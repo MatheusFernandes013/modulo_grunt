@@ -4,7 +4,7 @@ module.exports = function(grunt) {
         less: {
             development: {
                 files: {
-                    'main.css': 'main.less'
+                    'dev/styles/main.css': 'src/styles/main.less'
                 }
             },
             production: {
@@ -12,35 +12,54 @@ module.exports = function(grunt) {
                     compress: true,
                 },
                 files: {
-                    'main.min.css': 'main.less'
+                    'dist/styles/main.min.css': 'src/styles/main.less'
                 }
             }
         },
-        sass: {
+        watch: {
+            less: {
+                files: ['src/styles/**/*.less'],
+                tasks: ['less:development']
+            }
+        },
+        replace: {
+            dev: {
+                options: {
+                    patterns: [
+                        {
+                            match: 'ENDERECO_DO_CSS',
+                            replacement: './styles/main.css'
+                        }
+                    ]
+                },
+                files: [
+                    {
+                        expand: true,
+                        flatten: true,
+                        src: ['src/index.html'],
+                        dest: 'dev/'
+                    }
+                ]
+            }
+        },
+        htmlmin: {
             dist: {
                 options: {
-                    style: 'compressed'
+                    removeComments: true,
+                    collapseWhitespace: true,
                 },
                 files: {
-                    'main2.css': 'main.scss'
+                    
                 }
             }
-        },
-        concurrent: {
-            target: ['olaGrunt', 'less', 'sass']
         }
     })
 
-    grunt.registerTask('olaGrunt', function(){
-        const done = this.async();
-        setTimeout(function (){
-            console.log('Olá Grunt');
-            done();
-        }, 3000);
-    })
     grunt.loadNpmTasks('grunt-contrib-less');
-    grunt.loadNpmTasks('grunt-contrib-sass');
-    grunt.loadNpmTasks('grunt-concurrent');
+    grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-replace');
+    grunt.loadNpmTasks('grunt-contrib-htmlmin');
 
-    grunt.registerTask('default', ['concurrent']);
+    grunt.registerTask('default', ['watch']);
+    grunt.registerTask('build', ['less:production']);
 }
